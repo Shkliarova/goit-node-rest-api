@@ -1,8 +1,8 @@
-const express = require("express");
-const morgan = require("morgan");
-const cors = require("cors");
+import express from "express";
+import morgan from "morgan";
+import cors from "cors";
 
-const contactsRouter = require("./routes/contactsRouter");
+import {contactsRouter} from "./routes/contactsRouter.js";
 
 const app = express();
 
