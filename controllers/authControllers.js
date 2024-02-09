@@ -1,7 +1,10 @@
-import { User } from "../schemas/usersSchema";
-import { HttpError } from "../helpers/HttpError";
+import { User } from "../schemas/usersSchema.js";
+import { HttpError } from "../helpers/HttpError.js";
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
+import dotenv from "dotenv"
+
+dotenv.config()
 
 const { JWT_SECRET } = process.env;
 

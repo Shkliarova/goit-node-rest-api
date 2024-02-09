@@ -3,7 +3,8 @@ import { Contact } from '../schemas/contactSchema.js';
 
 export const getAllContacts = async (req, res, next) => {
     try {
-        const result = await Contact.find();
+        const {_id} = req.user;
+        const result = await Contact.find({owner: _id});
         res.status(200).json(result);
       } catch (error) {
         next(error);
@@ -13,7 +14,8 @@ export const getAllContacts = async (req, res, next) => {
 export const getOneContact = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const result = await Contact.findById(id);
+        const {_id} = req.user;
+        const result = await Contact.findById({_id: id, owner: _id});
         if (!result) {
           throw HttpError(404, 'Contact not found');
         }
@@ -26,7 +28,11 @@ export const getOneContact = async (req, res, next) => {
 export const deleteContact = async (req, res, next) => {
     try {
       const { id } = req.params;
-      const result = await Contact.findByIdAndDelete(id);
+      const {_id} = req.user;
+      const result = await Contact.findByIdAndDelete({
+        _id: id,
+        owner: _id,
+      });
       if (!result) {
         throw HttpError(404, 'Contact not found');
       }
@@ -38,7 +44,8 @@ export const deleteContact = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const result = await Contact.create(req.body);
+    const {_id} = req.user;
+    const result = await Contact.create({...req.body, owner: _id});
 
     res.status(201).json(result);
   } catch (error) {
@@ -49,8 +56,12 @@ export const createContact = async (req, res, next) => {
 export const updateContact = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const {_id} = req.user;
 
-    const result = await Contact.findByIdAndUpdate(id, req.body, { returnDocument: "after" });
+    const result = await Contact.findByIdAndUpdate(
+      {_id: id, 
+      ...req.body, 
+      owner: _id}, { returnDocument: "after" });
 
     if (!result) {
         throw HttpError(404, 'Not found');
@@ -64,9 +75,13 @@ export const updateContact = async (req, res, next) => {
 
 export const updateStatusContact = async (req, res, next) => {
   try {
-    const { id } = req.params
+    const { id } = req.params;
+    const {_id} = req.user;
 
-    const result = await Contact.findByIdAndUpdate(id, req.body, { returnDocument: "after" })
+    const result = await Contact.findByIdAndUpdate(
+      {_id: id, 
+      ...req.body, 
+      owner: _id}, { returnDocument: "after" })
 
     if (!result) {
       throw HttpError(404, 'Not found');
