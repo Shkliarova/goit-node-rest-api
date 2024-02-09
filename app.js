@@ -9,6 +9,7 @@ dotenv.config()
 const {DB_HOST} = process.env;
 
 import {contactsRouter} from "./routes/contactsRouter.js";
+import { authRouter } from "./routes/authRouter.js";
 
 const app = express();
 
@@ -17,13 +18,23 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/contacts", contactsRouter);
+app.use("/api/auth", authRouter);
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
 app.use((err, req, res, next) => {
-  const { status = 500, message = "Server error" } = err;
+  const { status = 500, message = "Server error", code, name } = err;
+
+  if(name === 'ValidationError'){
+    return res.status(400).json({ message });
+  }
+
+  if(message.includes('E11000')){
+    return res.status(400).json({ message: 'Dublicated key' });
+  }
+
   res.status(status).json({ message });
 });
 

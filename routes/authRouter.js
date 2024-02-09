@@ -1,8 +1,8 @@
 import express from 'express';
-import { register, login, logout, getCurrent } from '../controllers/authControllers';
-import { validateBody } from '../helpers/validateBody';
-import { registerSchema, loginSchema } from '../schemas/authValidationSchema';
-import { authMiddleware } from '../controllers/middlewares/authMiddleware';
+import { register, login, logout, getCurrent } from '../controllers/authControllers.js';
+import { validateBody } from '../helpers/validateBody.js';
+import { registerSchema, loginSchema } from '../schemas/authValidationSchema.js';
+import { authMiddleware } from '../controllers/middlewares/authMiddleware.js';
 
 export const authRouter = express.Router();
 
