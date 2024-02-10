@@ -3,8 +3,7 @@ import { Contact } from '../schemas/contactSchema.js';
 
 export const getAllContacts = async (req, res, next) => {
     try {
-        const {_id} = req.user;
-        const result = await Contact.find({owner: _id});
+        const result = await Contact.find();
         res.status(200).json(result);
       } catch (error) {
         next(error);
@@ -29,7 +28,7 @@ export const deleteContact = async (req, res, next) => {
     try {
       const { id } = req.params;
       const {_id} = req.user;
-      const result = await Contact.findByIdAndDelete({
+      const result = await Contact.findByIdAndDelete(id, {
         _id: id,
         owner: _id,
       });
@@ -44,8 +43,7 @@ export const deleteContact = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const {_id} = req.user;
-    const result = await Contact.create({...req.body, owner: _id});
+    const result = await Contact.create(req.body);
 
     res.status(201).json(result);
   } catch (error) {
@@ -58,10 +56,7 @@ export const updateContact = async (req, res, next) => {
     const { id } = req.params;
     const {_id} = req.user;
 
-    const result = await Contact.findByIdAndUpdate(
-      {_id: id, 
-      ...req.body, 
-      owner: _id}, { returnDocument: "after" });
+    const result = await Contact.findByIdAndUpdate(id, {_id: id, owner: _id, ...req.body}, { returnDocument: "after" });
 
     if (!result) {
         throw HttpError(404, 'Not found');
@@ -78,7 +73,7 @@ export const updateStatusContact = async (req, res, next) => {
     const { id } = req.params;
     const {_id} = req.user;
 
-    const result = await Contact.findByIdAndUpdate(
+    const result = await Contact.findByIdAndUpdate(id,
       {_id: id, 
       ...req.body, 
       owner: _id}, { returnDocument: "after" })
