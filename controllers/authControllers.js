@@ -22,7 +22,7 @@ export const register = async (req, res, next) => {
         res.status(201).json({
             id: result._id,
             email,
-            subscription: 'starter',
+            subscription: result.subscription,
         })
     } catch (error) {
         if(error.code === 11000){
@@ -53,34 +53,24 @@ export const login = async (req, res, next) => {
         token,
         user: {
             email,
-            subscription: "starter",
+            subscription: user.subscription,
           }
     });
 }
 
 export const logout = async (req, res) => {
     const {_id} = req.user;
-    const user = await User.findByIdAndUpdate(_id, {token: ''});
-
-    if(!user){
-        throw HttpError(401, "Not authorized");
-    }
-
+    await User.findByIdAndUpdate(_id, {token: ''}, { new: true });
     res.status(204).json({
         message: "Logout success",
     })
 }
 
 export const getCurrent = async (req, res) => {
-    const {email, _id} = req.user;
-    const user = await User.findById(_id);
-
-    if(!user){
-        throw HttpError(401, "Not authorized");
-    }
+    const {email, subscription} = req.user;
 
     res.status(200).json({
         email,
-        subscription: "starter",
+        subscription,
     })
 }
