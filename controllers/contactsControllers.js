@@ -3,8 +3,9 @@ import { Contact } from '../schemas/contactSchema.js';
 
 export const getAllContacts = async (req, res, next) => {
     try {
-        const result = await Contact.find();
-        res.status(200).json(result);
+      const {_id} = req.user;
+      const result = await Contact.find({owner: _id});
+      res.status(200).json(result);
       } catch (error) {
         next(error);
       }
@@ -14,7 +15,7 @@ export const getOneContact = async (req, res, next) => {
     try {
         const { id } = req.params;
         const {_id} = req.user;
-        const result = await Contact.findById({_id: id, owner: _id});
+        const result = await Contact.findOne({_id: id, owner: _id});
         if (!result) {
           throw HttpError(404, 'Contact not found');
         }
@@ -28,7 +29,7 @@ export const deleteContact = async (req, res, next) => {
     try {
       const { id } = req.params;
       const {_id} = req.user;
-      const result = await Contact.findByIdAndDelete(id, {
+      const result = await Contact.findOneAndDelete({
         _id: id,
         owner: _id,
       });
@@ -43,7 +44,8 @@ export const deleteContact = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const result = await Contact.create(req.body);
+    const {_id} = req.user;
+    const result = await Contact.create({...req.body, owner: _id});
 
     res.status(201).json(result);
   } catch (error) {
@@ -56,7 +58,7 @@ export const updateContact = async (req, res, next) => {
     const { id } = req.params;
     const {_id} = req.user;
 
-    const result = await Contact.findByIdAndUpdate(id, {_id: id, owner: _id, ...req.body}, { returnDocument: "after" });
+    const result = await Contact.findOneAndUpdate({_id: id, owner: _id}, req.body, { returnDocument: "after" });
 
     if (!result) {
         throw HttpError(404, 'Not found');
@@ -73,10 +75,7 @@ export const updateStatusContact = async (req, res, next) => {
     const { id } = req.params;
     const {_id} = req.user;
 
-    const result = await Contact.findByIdAndUpdate(id,
-      {_id: id, 
-      ...req.body, 
-      owner: _id}, { returnDocument: "after" })
+    const result = await Contact.findOneAndUpdate({_id: id, owner: _id}, req.body, { returnDocument: "after" });
 
     if (!result) {
       throw HttpError(404, 'Not found');
