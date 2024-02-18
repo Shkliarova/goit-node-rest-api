@@ -2,7 +2,9 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import mongoose from "mongoose";
-import dotenv from "dotenv"
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import dotenv from "dotenv";
 
 dotenv.config()
 
@@ -10,6 +12,9 @@ const {DB_HOST} = process.env;
 
 import {contactsRouter} from "./routes/contactsRouter.js";
 import { authRouter } from "./routes/authRouter.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 
@@ -37,6 +42,8 @@ app.use((err, req, res, next) => {
 
   res.status(status).json({ message });
 });
+
+app.use('/avatars', express.static(join(__dirname, 'public', 'avatars')));
 
 mongoose.connect(DB_HOST)
 .then(() => console.log("Database connection successful"))

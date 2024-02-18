@@ -1,6 +1,6 @@
-import { HttpError } from "../../helpers/HttpError.js";
+import { HttpError } from "../helpers/HttpError.js";
 import jwt from "jsonwebtoken";
-import { User } from "../../schemas/usersSchema.js";
+import { User } from "../schemas/usersSchema.js";
 import dotenv from "dotenv"
 
 dotenv.config()

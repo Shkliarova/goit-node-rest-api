@@ -2,7 +2,8 @@ import { User } from "../schemas/usersSchema.js";
 import { HttpError } from "../helpers/HttpError.js";
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
-import dotenv from "dotenv"
+import dotenv from "dotenv";
+import gravatar from "gravatar";
 
 dotenv.config()
 
@@ -12,6 +13,7 @@ export const register = async (req, res, next) => {
     const { email, password } = req.body;
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
+    const avURL = gravatar.url(email);
 
     try {
         const result = await User.create({
@@ -23,6 +25,7 @@ export const register = async (req, res, next) => {
             id: result._id,
             email,
             subscription: result.subscription,
+            avatarURL: avURL,
         })
     } catch (error) {
         if(error.code === 11000){
