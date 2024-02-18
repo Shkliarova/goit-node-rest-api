@@ -26,36 +26,44 @@ export const register = async (req, res, next) => {
         })
     } catch (error) {
         if(error.code === 11000){
-            throw HttpError(409, 'Email in use');
+            next(HttpError(409, 'Email in use'));
         }
-        throw error;
+        //was a crash using existing email
+        //pass error to the next middleware
+        next(error);
     }
 }
 
 export const login = async (req, res, next) => {
+    //add try/catch blocks
+    // in catch block pass error to the next middleware
     const { email, password } = req.body;
 
-    const user = await User.findOne({email});
+    try {
+        const user = await User.findOne({email});
 
-    if(!user){
-        throw HttpError(401, "Email or password is wrong");
+        if(!user){
+            next(HttpError(401, "Email or password is wrong"));
+        }
+
+        const isValidPassword = await bcrypt.compare(password, user.password);
+
+        if(!isValidPassword){
+            next(HttpError(401, "Email or password is wrong"));
+        }
+
+        const token = jwt.sign({id: user.id}, JWT_SECRET, {expiresIn: '24h'});
+
+        res.status(200).json({
+            token,
+            user: {
+                email,
+                subscription: user.subscription,
+            }
+        });
+    } catch (error) {
+        next(error);
     }
-
-    const isValidPassword = await bcrypt.compare(password, user.password);
-
-    if(!isValidPassword){
-        throw HttpError(401, "Email or password is wrong");
-    }
-
-    const token = jwt.sign({id: user.id}, JWT_SECRET, {expiresIn: '24h'});
-
-    res.status(200).json({
-        token,
-        user: {
-            email,
-            subscription: user.subscription,
-          }
-    });
 }
 
 export const logout = async (req, res) => {
