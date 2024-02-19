@@ -25,6 +25,8 @@ app.use(express.json());
 app.use("/api/contacts", contactsRouter);
 app.use("/api/auth", authRouter);
 
+app.use('/public/avatars', express.static(join(__dirname, 'public', 'avatars')));
+
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
 });
@@ -42,8 +44,6 @@ app.use((err, req, res, next) => {
 
   res.status(status).json({ message });
 });
-
-app.use('/avatars', express.static(join(__dirname, 'public', 'avatars')));
 
 mongoose.connect(DB_HOST)
 .then(() => console.log("Database connection successful"))
