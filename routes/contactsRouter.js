@@ -10,7 +10,7 @@ import {
 import { isValidId } from '../helpers/isValidId.js';
 import { validateBody } from '../helpers/validateBody.js'
 import { createContactSchema, updateContactSchema, favoriteSchema } from '../schemas/contactValidationSchema.js';
-import { authMiddleware } from '../controllers/middlewares/authMiddleware.js';
+import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 export const contactsRouter = express.Router();
 

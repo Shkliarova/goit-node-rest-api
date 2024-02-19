@@ -2,7 +2,9 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import mongoose from "mongoose";
-import dotenv from "dotenv"
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import dotenv from "dotenv";
 
 dotenv.config()
 
@@ -10,6 +12,9 @@ const {DB_HOST} = process.env;
 
 import {contactsRouter} from "./routes/contactsRouter.js";
 import { authRouter } from "./routes/authRouter.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 
@@ -19,6 +24,8 @@ app.use(express.json());
 
 app.use("/api/contacts", contactsRouter);
 app.use("/api/auth", authRouter);
+
+app.use('/public/avatars', express.static(join(__dirname, 'public', 'avatars')));
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
