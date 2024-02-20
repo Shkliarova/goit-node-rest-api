@@ -58,7 +58,7 @@ export const updateContact = async (req, res, next) => {
     const { id } = req.params;
     const {_id} = req.user;
 
-    const result = await Contact.findOneAndUpdate({_id: id, owner: _id}, req.body, { returnDocument: "after" });
+    const result = await Contact.findOneAndUpdate({_id: id, owner: _id}, req.body, { new: true });
 
     if (!result) {
         throw HttpError(404, 'Not found');
@@ -75,7 +75,7 @@ export const updateStatusContact = async (req, res, next) => {
     const { id } = req.params;
     const {_id} = req.user;
 
-    const result = await Contact.findOneAndUpdate({_id: id, owner: _id}, req.body, { returnDocument: "after" });
+    const result = await Contact.findOneAndUpdate({_id: id, owner: _id}, req.body, { new: true });
 
     if (!result) {
       throw HttpError(404, 'Not found');

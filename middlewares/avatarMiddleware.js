@@ -20,6 +20,10 @@ export const upload = multer({ storage: storage });
 export const updateAvatar = async (req, res, next) => {
     try {
         const { user, file } = req;
+
+        if(!file){
+            throw HttpError(400, 'Please upload the file');
+        }
         
         const image = await jimp.read(file.path);
         const avatarFileName = `${user._id}.jpg`;
