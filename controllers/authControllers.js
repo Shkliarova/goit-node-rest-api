@@ -4,10 +4,39 @@ import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
 import dotenv from "dotenv";
 import gravatar from "gravatar";
+import { v4 as uuidv4 } from "uuid";
+import nodemailer from "nodemailer";
 
 dotenv.config()
 
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET, MAILER_PASS, MAILER_EMAIL } = process.env;
+
+const sendVerificationEmail = async (email, verificationToken) => {
+    try {
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.meta.ua',
+            port: 587,
+            secure: false,
+            auth: {
+                user: MAILER_EMAIL,
+                pass: MAILER_PASS
+            }
+        });
+    
+        const verificationLink = `http://localhost:3000/api/auth/verify/${verificationToken}`;
+    
+        await transporter.sendMail({
+            from: MAILER_EMAIL,
+            to: email,
+            subject: 'Email Verification',
+            text: `Please verify your email: ${verificationLink}`,
+            html: `<p>Please verify your email: <a href="${verificationLink}">${verificationLink}</a></p>`
+        });
+    
+    } catch (error) {
+        console.error('Verification email does not sent:', error);
+    }
+};
 
 export const register = async (req, res, next) => {
     const { email, password } = req.body;
@@ -19,7 +48,10 @@ export const register = async (req, res, next) => {
         const result = await User.create({
             email,
             password: hashedPassword,
+            verificationToken: uuidv4(),
         })
+
+        await sendVerificationEmail(email, result.verificationToken);
 
         res.status(201).json({
             id: result._id,
@@ -31,15 +63,11 @@ export const register = async (req, res, next) => {
         if(error.code === 11000){
             next(HttpError(409, 'Email in use'));
         }
-        //was a crash using existing email
-        //pass error to the next middleware
         next(error);
     }
 }
 
 export const login = async (req, res, next) => {
-    //add try/catch blocks
-    // in catch block pass error to the next middleware
     const { email, password } = req.body;
 
     try {
@@ -85,3 +113,52 @@ export const getCurrent = async (req, res) => {
         subscription,
     })
 }
+
+export const verifyEmail = async (req, res, next) => {
+    const { verificationToken } = req.params;
+
+    try {
+        const user = await User.findOne({ verificationToken });
+
+        if (!user) {
+            return next(HttpError(404, 'User not found'));
+        }
+
+        user.verify = true;
+        user.verificationToken = null;
+        await user.save();
+
+        res.status(200).json({ message: 'Verification successful' });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const resendVerificationEmail = async (req, res, next) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ message: 'Missing required field email' });
+    }
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return next(HttpError(404, 'User not found'));
+        }
+
+        if (user.verify) {
+            return res.status(400).json({ message: 'Verification has already been passed' });
+        }
+
+        user.verificationToken = uuidv4();
+        await user.save();
+
+        await sendVerificationEmail(email, user.verificationToken);
+
+        res.status(200).json({ message: 'Verification email sent' });
+    } catch (error) {
+        next(error);
+    }
+};
