@@ -9,29 +9,33 @@ import nodemailer from "nodemailer";
 
 dotenv.config()
 
-const { JWT_SECRET, MAILER_PASS, MAILER_EMAIL } = process.env;
+const { JWT_SECRET, MAILER_PASS } = process.env;
 
 const sendVerificationEmail = async (email, verificationToken) => {
     try {
-        const transporter = nodemailer.createTransport({
+        const config = {
             host: 'smtp.meta.ua',
             port: 587,
             secure: false,
             auth: {
-                user: MAILER_EMAIL,
+                user: "aeilssia@meta.ua",
                 pass: MAILER_PASS
             }
-        });
+        }
+
+        const transporter = nodemailer.createTransport(config);
     
         const verificationLink = `http://localhost:3000/api/auth/verify/${verificationToken}`;
-    
-        await transporter.sendMail({
-            from: MAILER_EMAIL,
+
+        const mailOptions = {
+            from: "aeilssia@meta.ua",
             to: email,
             subject: 'Email Verification',
             text: `Please verify your email: ${verificationLink}`,
             html: `<p>Please verify your email: <a href="${verificationLink}">${verificationLink}</a></p>`
-        });
+        }
+    
+        await transporter.sendMail(mailOptions);
     
     } catch (error) {
         console.error('Verification email does not sent:', error);
