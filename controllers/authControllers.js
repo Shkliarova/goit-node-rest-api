@@ -15,8 +15,8 @@ const sendVerificationEmail = async (email, verificationToken) => {
     try {
         const config = {
             host: 'smtp.meta.ua',
-            port: 587,
-            secure: false,
+            port: 465,
+            secure: true,
             auth: {
                 user: "aeilssia@meta.ua",
                 pass: MAILER_PASS
