@@ -14,5 +14,5 @@ authRouter.post('/login', validateBody(loginSchema), login);
 authRouter.post('/logout', authMiddleware, logout);
 authRouter.get('/current', authMiddleware, getCurrent);
 authRouter.patch('/avatars', authMiddleware, upload.single('avatar'), updateAvatar);
-authRouter.get('verify/:verificationToken', verifyEmail);
+authRouter.get('/verify/:verificationToken', verifyEmail);
 authRouter.post('/verify', resendVerificationEmail);
