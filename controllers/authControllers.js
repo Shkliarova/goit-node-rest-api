@@ -129,7 +129,7 @@ export const verifyEmail = async (req, res, next) => {
         }
 
         user.verify = true;
-        user.verificationToken = null;
+        user.verificationToken = "";
         await user.save();
 
         res.status(200).json({ message: 'Verification successful' });
