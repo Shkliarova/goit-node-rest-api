@@ -9,7 +9,7 @@ import nodemailer from "nodemailer";
 
 dotenv.config()
 
-const { JWT_SECRET, MAILER_PASS } = process.env;
+const { JWT_SECRET, MAILER_PASS, LOCAL_HOST } = process.env;
 
 const sendVerificationEmail = async (email, verificationToken) => {
     try {
@@ -25,7 +25,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
 
         const transporter = nodemailer.createTransport(config);
     
-        const verificationLink = `http://localhost:3000/api/auth/verify/${verificationToken}`;
+        const verificationLink = `${LOCAL_HOST}/api/auth/verify/${verificationToken}`;
 
         const mailOptions = {
             from: "aeilssia@meta.ua",
@@ -78,13 +78,17 @@ export const login = async (req, res, next) => {
         const user = await User.findOne({email});
 
         if(!user){
-            next(HttpError(401, "Email or password is wrong"));
+            return next(HttpError(401, "Email or password is wrong"));
+        }
+
+        if (!user.verify) {
+            return next(HttpError(401, "Email not verified"));
         }
 
         const isValidPassword = await bcrypt.compare(password, user.password);
 
         if(!isValidPassword){
-            next(HttpError(401, "Email or password is wrong"));
+            return next(HttpError(401, "Email or password is wrong"));
         }
 
         const token = jwt.sign({id: user.id}, JWT_SECRET, {expiresIn: '24h'});
@@ -155,9 +159,6 @@ export const resendVerificationEmail = async (req, res, next) => {
         if (user.verify) {
             return res.status(400).json({ message: 'Verification has already been passed' });
         }
-
-        user.verificationToken = uuidv4();
-        await user.save();
 
         await sendVerificationEmail(email, user.verificationToken);
 
